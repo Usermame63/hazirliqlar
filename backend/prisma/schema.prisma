@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id             String          @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String          @unique
+  passwordHash   String
+  phone          String?
+  role           Role            @default(STUDENT)
+  avatarUrl      String?
+  isVerified     Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  
+  teacherProfile TeacherProfile?
+  sentMessages   Message[]       @relation("SentMessages")
+  receivedMsgs   Message[]       @relation("ReceivedMessages")
+  reviews        Review[]        @relation("StudentReviews")
+}
+
+model TeacherProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  
+  fatherName     String?
+  subjects       String[] 
+  experience     Int      
+  pricePerMonth  Float
+  teachingLang   String[]
+  mode           String   
+  about          String?
+  address        String?
+  lat            Float?   
+  lng            Float?   
+  certificates   String[] 
+  isActive       Boolean  @default(true)
+  isPremium      Boolean  @default(false)
+  
+  reviews        Review[]
+}
+
+model Review {
+  id             String         @id @default(uuid())
+  rating         Int            
+  comment        String?
+  studentId      String
+  student        User           @relation("StudentReviews", fields: [studentId], references: [id])
+  teacherId      String
+  teacher        TeacherProfile @relation(fields: [teacherId], references: [id])
+  createdAt      DateTime       @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  senderId   String
+  receiverId String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
