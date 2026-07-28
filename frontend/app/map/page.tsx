@@ -37,7 +37,7 @@ export default function GlobalMap() {
       const container = document.getElementById('global-map');
       if (container != null) {
         // ƏSAS HƏLL BURADADIR: Köhnə xəritənin qalıqlarını tamamilə silirik
-        container._leaflet_id = null; 
+        (container as any)._leaflet_id = null;
         container.innerHTML = ''; 
       }
 
