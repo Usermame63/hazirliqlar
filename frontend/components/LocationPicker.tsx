@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+// @ts-ignore
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -62,6 +63,7 @@ export default function LocationPicker({ onLocationSelect }: { onLocationSelect:
       </button>
       
       <div className="h-[300px] w-full rounded-lg overflow-hidden border-2 border-slate-200 relative z-0">
+        {/* @ts-ignore */}
         <MapContainer center={position} zoom={12} style={{ height: '100%', width: '100%' }}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapUpdater center={position} />
