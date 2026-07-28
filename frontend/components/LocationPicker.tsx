@@ -27,7 +27,7 @@ export default function LocationPicker({ onLocationSelect }: { onLocationSelect:
   // Xəritəyə klikləyəndə markerin yerini dəyişmək
   const MapEvents = () => {
     useMapEvents({
-      click(e) {
+      click(e: any) {
         setPosition([e.latlng.lat, e.latlng.lng]);
         onLocationSelect(e.latlng.lat, e.latlng.lng);
       },
