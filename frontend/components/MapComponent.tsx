@@ -18,6 +18,7 @@ export default function MapComponent() {
 
   return (
     <div className="w-full h-[600px] rounded-xl overflow-hidden shadow-lg border-2 border-gray-200 z-0 relative">
+      {/* @ts-ignore */}
       <MapContainer center={defaultPosition} zoom={12} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 1 }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
