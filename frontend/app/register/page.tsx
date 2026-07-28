@@ -36,7 +36,7 @@ export default function Register() {
 
     try {
       // Backend-ə məlumatları göndərməzdən əvvəl rəqəmləri Number() ilə çeviririk
-      await axios.post("http://localhost:5000/api/auth/register", {
+      await axios.post("https://hazirliqlar-backend.onrender.com/api/auth/register", {
         ...formData,
         role: role,
         // Prisma-nın xəta verməməsi üçün mətnləri riyazi rəqəmə (Int) çeviririk:
