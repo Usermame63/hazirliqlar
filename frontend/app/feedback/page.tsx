@@ -204,7 +204,7 @@ export default function FeedbackPage() {
 
               {fb.replies.length > 0 && (
                 <div className="mt-5 space-y-3 pl-4 md:pl-10 border-l-2 border-slate-100">
-                  {fb.replies.map(reply => (
+                  {fb.replies.map((reply: any) => (
                     <div key={reply.id} className="p-4 rounded-xl border bg-slate-50 border-slate-100">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-bold text-sm text-slate-800">{reply.author}</span>
