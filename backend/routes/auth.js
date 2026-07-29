@@ -7,21 +7,18 @@ const router = express.Router();
 
 const otpStore = new Map();
 
-// --- ZİREHLƏNDİRİLMİŞ VƏ LİMİTLƏNMİŞ E-POÇT SİSTEMİ ---
+// --- 587 NÖMRƏLİ PORTLA (TLS) YENİ GİRİŞ SİSTEMİ ---
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, 
+  port: 587,             // 465 əvəzinə 587 qoyduq
+  secure: false,         // 587 portu üçün bu mütləq false olmalıdır
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
   tls: {
-    rejectUnauthorized: false // Bəzi server xətalarının qarşısını alır
-  },
-  connectionTimeout: 10000, // 10 saniyəyə qoşula bilməsə donub qalma, əlaqəni kəs!
-  greetingTimeout: 10000,
-  socketTimeout: 10000
+    rejectUnauthorized: false
+  }
 });
 
 // 1. QEYDİYYAT
@@ -58,7 +55,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ
+// 2. GİRİŞ 
 router.post('/login', async (req, res) => {
   try {
     console.log("---- YENİ LOGİN İSTƏYİ GƏLDİ ----");
@@ -79,7 +76,7 @@ router.post('/login', async (req, res) => {
     const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
     otpStore.set(email, otpCode);
 
-    console.log(`ADIM 4: ${process.env.EMAIL_USER} ünvanından ${email} ünvanına e-poçt göndərilir...`);
+    console.log(`ADIM 4: ${process.env.EMAIL_USER} ünvanından ${email} ünvanına Port 587 ilə e-poçt göndərilir...`);
     
     const mailOptions = {
       from: `"Hazırlıqlar Platforması" <${process.env.EMAIL_USER}>`,
