@@ -5,10 +5,8 @@ const nodemailer = require('nodemailer');
 const prisma = require('../db'); 
 const router = express.Router();
 
-// OTP Yaddaşı (Müvəqqəti olaraq kodları burda saxlayırıq)
 const otpStore = new Map();
 
-// E-poçt göndərən sistem (Nodemailer)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -17,7 +15,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// 1. QEYDİYYAT SİSTEMİ
+// 1. QEYDİYYAT
 router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, role, phone, fatherName, motherName, subject, price, experience } = req.body;
@@ -51,7 +49,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ (TEST ÜÇÜN DƏYİŞDİRİLDİ - MAİL GÖNDƏRMİR, KOD: 1111)
+// 2. GİRİŞ (ƏSL E-POÇTLA KOD GÖNDƏRMƏ BƏRPA OLUNDU)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,47 +60,42 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(400).json({ message: "Şifrə yanlışdır!" });
 
-    // TEST ÜÇÜN: Təsadüfi kod əvəzinə sabit "1111" qoyuruq
-    const otpCode = "1111";
-    
-    // Kodu yaddaşa yazırıq
+    // 4 rəqəmli REAL təsadüfi kod yaradılır
+    const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
     otpStore.set(email, otpCode);
 
-    // TEST ÜÇÜN: E-poçt göndərmə sistemini (Nodemailer) bağladıq!
-    /* 
+    // Əsl e-poçt göndərilir
     const mailOptions = {
-      from: \`"Hazırlıqlar Platforması" <\${process.env.EMAIL_USER}>\`,
+      from: `"Hazırlıqlar Platforması" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '🔐 Təhlükəsizlik Kodunuz',
-      html: \`...\`
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+          <h2 style="color: #2563eb;">Hazırlıqlar Platformasına Giriş</h2>
+          <p style="font-size: 16px; color: #475569;">Hesabınıza daxil olmaq üçün təsdiq kodunuz:</p>
+          <div style="font-size: 32px; font-weight: bold; background: #f1f5f9; padding: 15px; border-radius: 10px; letter-spacing: 5px; color: #0f172a; width: fit-content; margin: 0 auto;">
+            ${otpCode}
+          </div>
+          <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Bu kodu heç kimlə paylaşmayın.</p>
+        </div>
+      `
     };
+
     await transporter.sendMail(mailOptions);
-    */
-
-    console.log("TEST: Sistem e-poçt göndərmədi, birbaşa cavab verdi.");
-
-    // Server donmadan dərhal frontend-ə xəbər verir
     res.json({ message: "OTP_SENT", email: user.email });
   } catch (error) {
     console.error("Giriş xətası:", error);
-    res.status(500).json({ message: "Giriş zamanı xəta baş verdi." });
+    res.status(500).json({ message: "Kod göndərilərkən xəta baş verdi. Gmail ayarlarını yoxlayın." });
   }
 });
 
-// 3. KODU TƏSDİQLƏ VƏ İÇƏRİ BURAX
+// 3. KODU TƏSDİQLƏ
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
-    
-    // Yaddaşdakı kodla gələn kodu yoxlayırıq
-    if (otpStore.get(email) !== otp) {
-      return res.status(400).json({ message: "Daxil etdiyiniz kod yanlışdır!" });
-    }
+    if (otpStore.get(email) !== otp) return res.status(400).json({ message: "Daxil etdiyiniz kod yanlışdır!" });
 
-    // Kod düzdürsə, bir daha istifadə olunmasın deyə silirik
     otpStore.delete(email);
-
-    // İstifadəçini tapıb əsl icazəni (Token) veririk
     const user = await prisma.user.findUnique({ where: { email } });
     const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
