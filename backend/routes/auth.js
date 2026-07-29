@@ -7,12 +7,21 @@ const router = express.Router();
 
 const otpStore = new Map();
 
+// --- ZİREHLƏNDİRİLMİŞ VƏ LİMİTLƏNMİŞ E-POÇT SİSTEMİ ---
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  tls: {
+    rejectUnauthorized: false // Bəzi server xətalarının qarşısını alır
+  },
+  connectionTimeout: 10000, // 10 saniyəyə qoşula bilməsə donub qalma, əlaqəni kəs!
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 // 1. QEYDİYYAT
@@ -49,12 +58,11 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ (XƏFİYYƏ KODU ƏLAVƏ EDİLDİ)
+// 2. GİRİŞ
 router.post('/login', async (req, res) => {
   try {
     console.log("---- YENİ LOGİN İSTƏYİ GƏLDİ ----");
     const { email, password } = req.body;
-    console.log("ADIM 1: E-poçt yoxlanılır -", email);
     
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -62,18 +70,17 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Bu e-poçt qeydiyyatdan keçməyib!" });
     }
 
-    console.log("ADIM 2: İstifadəçi tapıldı, şifrə yoxlanılır...");
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       console.log("XƏTA: Şifrə yanlışdır!");
       return res.status(400).json({ message: "Şifrə yanlışdır!" });
     }
 
-    console.log("ADIM 3: Şifrə doğrudur. 4 rəqəmli kod yaradılır...");
     const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
     otpStore.set(email, otpCode);
 
-    console.log("ADIM 4: Gmail vasitəsilə e-poçt göndərilməyə başlanır... (Zəhmət olmasa gözləyin)");
+    console.log(`ADIM 4: ${process.env.EMAIL_USER} ünvanından ${email} ünvanına e-poçt göndərilir...`);
+    
     const mailOptions = {
       from: `"Hazırlıqlar Platforması" <${process.env.EMAIL_USER}>`,
       to: email,
