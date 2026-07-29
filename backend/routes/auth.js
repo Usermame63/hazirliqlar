@@ -40,10 +40,10 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ (VERCEL-Ə SİQNAL GÖNDƏRİRİK)
+// 2. GİRİŞ (BİRBAŞA GİRİŞƏ KЕÇİLDİ - OTP LƏĞV EDİLDİ)
 router.post('/login', async (req, res) => {
   try {
-    console.log("---- YENİ LOGİN İSTƏYİ GƏLDİ ----");
+    console.log("---- YENİ BİRBAŞA LOGİN İSTƏYİ GƏLDİ ----");
     const { email, password } = req.body;
     
     const user = await prisma.user.findUnique({ where: { email } });
@@ -56,28 +56,30 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Şifrə yanlışdır!" });
     }
 
-    // Kod yaradılır və arxa planda yadda saxlanılır
+    /* MÜVƏQQƏTİ OLARAQ LƏĞV EDİLƏN OTP KODLARI 
     const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
     otpStore.set(email, otpCode);
-
-    console.log(`ADIM 4: E-poçt göndərilməsi üçün Vercel-ə (Frontend) siqnal verilir...`);
-    
-    // Render-in qapısı bağlı olduğu üçün maili göndərməyi Vercel-dən (API) xahiş edirik!
     fetch('https://hazirliqlar.vercel.app/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to: email, otp: otpCode })
-    }).catch(err => console.log("Vercel-ə bağlananda kiçik gecikmə ola bilər", err));
+    }).catch(err => console.log(err));
+    return res.json({ message: "OTP_SENT", email: user.email });
+    */
 
-    console.log("ADIM 5: Siqnal getdi! Frontend-ə OTP_SENT cavabı verilir.");
-    res.json({ message: "OTP_SENT", email: user.email });
+    // --- BİRBAŞA GİRİŞ İCAZƏSİ ---
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    console.log("Şifrə düzgündür! OTP olmadan birbaşa giriş icazəsi verildi.");
+    
+    res.json({ message: "Uğurlu", token, user });
+
   } catch (error) {
     console.error("!!! GİRİŞ ZAMANI XƏTA BAŞ VERDİ !!!", error);
     res.status(500).json({ message: "Giriş xətası baş verdi." });
   }
 });
 
-// 3. KODU TƏSDİQLƏ
+// 3. KODU TƏSDİQLƏ (Hələlik istifadə olunmayacaq, amma silmirik)
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
