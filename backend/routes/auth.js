@@ -49,22 +49,31 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ (ƏSL E-POÇTLA KOD GÖNDƏRMƏ BƏRPA OLUNDU)
+// 2. GİRİŞ (XƏFİYYƏ KODU ƏLAVƏ EDİLDİ)
 router.post('/login', async (req, res) => {
   try {
+    console.log("---- YENİ LOGİN İSTƏYİ GƏLDİ ----");
     const { email, password } = req.body;
+    console.log("ADIM 1: E-poçt yoxlanılır -", email);
     
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(400).json({ message: "Bu e-poçt qeydiyyatdan keçməyib!" });
+    if (!user) {
+      console.log("XƏTA: Bu e-poçt bazada tapılmadı!");
+      return res.status(400).json({ message: "Bu e-poçt qeydiyyatdan keçməyib!" });
+    }
 
+    console.log("ADIM 2: İstifadəçi tapıldı, şifrə yoxlanılır...");
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return res.status(400).json({ message: "Şifrə yanlışdır!" });
+    if (!isMatch) {
+      console.log("XƏTA: Şifrə yanlışdır!");
+      return res.status(400).json({ message: "Şifrə yanlışdır!" });
+    }
 
-    // 4 rəqəmli REAL təsadüfi kod yaradılır
+    console.log("ADIM 3: Şifrə doğrudur. 4 rəqəmli kod yaradılır...");
     const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
     otpStore.set(email, otpCode);
 
-    // Əsl e-poçt göndərilir
+    console.log("ADIM 4: Gmail vasitəsilə e-poçt göndərilməyə başlanır... (Zəhmət olmasa gözləyin)");
     const mailOptions = {
       from: `"Hazırlıqlar Platforması" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -76,15 +85,16 @@ router.post('/login', async (req, res) => {
           <div style="font-size: 32px; font-weight: bold; background: #f1f5f9; padding: 15px; border-radius: 10px; letter-spacing: 5px; color: #0f172a; width: fit-content; margin: 0 auto;">
             ${otpCode}
           </div>
-          <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Bu kodu heç kimlə paylaşmayın.</p>
         </div>
       `
     };
 
     await transporter.sendMail(mailOptions);
+    console.log("ADIM 5: ƏLA! E-poçt uğurla göndərildi!");
+
     res.json({ message: "OTP_SENT", email: user.email });
   } catch (error) {
-    console.error("Giriş xətası:", error);
+    console.error("!!! GİRİŞ ZAMANI XƏTA BAŞ VERDİ !!!", error);
     res.status(500).json({ message: "Kod göndərilərkən xəta baş verdi. Gmail ayarlarını yoxlayın." });
   }
 });
