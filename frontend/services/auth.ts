@@ -16,15 +16,3 @@ export const verifyOtp = async (email: string, otp: string) => {
   const res = await axios.post("https://hazirliqlar-backend.onrender.com/api/auth/verify-otp", { email, otp });
   return res.data;
 };
-
-// YENİ: Şifrəni unutdum - Emailə kod göndərmək üçün
-export const forgotPassword = async (email: string) => {
-  const res = await axios.post("https://hazirliqlar-backend.onrender.com/api/auth/forgot-password", { email });
-  return res.data;
-};
-
-// YENİ: Yeni şifrəni və kodu təsdiqləmək üçün
-export const resetPassword = async (email: string, otp: string, newPassword: string) => {
-  const res = await axios.post("https://hazirliqlar-backend.onrender.com/api/auth/reset-password", { email, otp, newPassword });
-  return res.data;
-};

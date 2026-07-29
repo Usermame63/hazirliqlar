@@ -51,7 +51,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. GİRİŞ (Şifrəni yoxla və REAL E-poçtla Kod Göndər)
+// 2. GİRİŞ (TEST ÜÇÜN DƏYİŞDİRİLDİ - MAİL GÖNDƏRMİR, KOD: 1111)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,36 +62,30 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(400).json({ message: "Şifrə yanlışdır!" });
 
-    // 4 rəqəmli REAL təsadüfi kod yaradırıq
-    const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+    // TEST ÜÇÜN: Təsadüfi kod əvəzinə sabit "1111" qoyuruq
+    const otpCode = "1111";
     
     // Kodu yaddaşa yazırıq
     otpStore.set(email, otpCode);
 
-    // E-poçtu göndəririk
+    // TEST ÜÇÜN: E-poçt göndərmə sistemini (Nodemailer) bağladıq!
+    /* 
     const mailOptions = {
-      from: `"Hazırlıqlar Platforması" <${process.env.EMAIL_USER}>`,
+      from: \`"Hazırlıqlar Platforması" <\${process.env.EMAIL_USER}>\`,
       to: email,
       subject: '🔐 Təhlükəsizlik Kodunuz',
-      html: `
-        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-          <h2 style="color: #2563eb;">Hazırlıqlar Platformasına Giriş</h2>
-          <p style="font-size: 16px; color: #475569;">Hesabınıza daxil olmaq üçün təsdiq kodunuz:</p>
-          <div style="font-size: 32px; font-weight: bold; background: #f1f5f9; padding: 15px; border-radius: 10px; letter-spacing: 5px; color: #0f172a; width: fit-content; margin: 0 auto;">
-            ${otpCode}
-          </div>
-          <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Bu kodu heç kimlə paylaşmayın.</p>
-        </div>
-      `
+      html: \`...\`
     };
-
     await transporter.sendMail(mailOptions);
+    */
 
-    // Əgər mail uğurla getdisə frontend-ə xəbər veririk
+    console.log("TEST: Sistem e-poçt göndərmədi, birbaşa cavab verdi.");
+
+    // Server donmadan dərhal frontend-ə xəbər verir
     res.json({ message: "OTP_SENT", email: user.email });
   } catch (error) {
-    console.error("Mail göndərilmədi:", error);
-    res.status(500).json({ message: "Kod göndərilərkən xəta baş verdi. Gmail ayarlarını yoxlayın." });
+    console.error("Giriş xətası:", error);
+    res.status(500).json({ message: "Giriş zamanı xəta baş verdi." });
   }
 });
 
