@@ -17,7 +17,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    // Əgər daxil olan şəxs ADMIN deyilsə (yəni şagird, müəllim və ya kənardan girən biridirsə), təhlükəsizlik üçün dərhal Ana səhifəyə atılır!
+    // Əgər daxil olan şəxs ADMIN deyilsə, təhlükəsizlik üçün dərhal Ana səhifəyə atılır!
     if (!token || role !== "ADMIN") {
       router.push("/");
       return; 
@@ -40,11 +40,17 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, [router]);
 
-  const handleDeleteUser = async (id: string) => {
+  const handleDeleteUser = async (id: string, userRole: string) => {
+    // TƏHLÜKƏSİZLİK: Admin hesabının silinməsinin qəti şəkildə qarşısını alırıq!
+    if (userRole === "ADMIN") {
+      alert("Xəta: Admin hesabı sistemdən silinə bilməz!");
+      return;
+    }
+
     if (!confirm("Bu istifadəçini sistemdən tamamilə silmək istədiyinizə əminsiniz?")) return;
     try {
       await axios.delete(`https://hazirliqlar-backend.onrender.com/api/admin/users/${id}`);
-      setUsers(users.filter((user) => user.id !== id));
+      setUsers(users.filter((user) => (user.id || user._id) !== id));
       
       const statsRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/stats");
       setStats(statsRes.data);
@@ -150,17 +156,17 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-slate-700 text-sm font-medium text-slate-300">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
+                    <tr key={user.id || user._id} className="hover:bg-slate-700/30 transition-colors">
                       <td className="p-4 text-white font-bold">{user.firstName} {user.lastName}</td>
                       <td className="p-4 text-slate-400">{user.email}</td>
                       <td className="p-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${user.role === 'TEACHER' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
-                          {user.role === 'TEACHER' ? 'Müəllim' : 'Şagird'}
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : user.role === 'TEACHER' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                          {user.role === 'ADMIN' ? 'Admin' : user.role === 'TEACHER' ? 'Müəllim' : 'Şagird'}
                         </span>
                       </td>
                       <td className="p-4 text-center">
                         <button 
-                          onClick={() => handleDeleteUser(user.id)} 
+                          onClick={() => handleDeleteUser(user.id || user._id, user.role)} 
                           className="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-3 py-1.5 rounded-xl border border-red-500/20 transition text-xs font-bold shadow-sm"
                         >
                           Sistemdən Sil
@@ -185,7 +191,6 @@ export default function AdminDashboard() {
               Mətnləri birbaşa ekran üzərindən silib-yazmaq və saytın görünüşünə canlı müdaxilə etmək üçün vizual redaktə rejiminə keçin.
             </p>
             
-            {/* SEHİRLİ DÜYMƏ BURADADIR */}
             <Link 
               href="/?edit=true" 
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition-all text-base tracking-wide flex items-center justify-center gap-2"

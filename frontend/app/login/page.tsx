@@ -26,9 +26,14 @@ export default function Login() {
       
       const data = res.data;
       
-      // Token və rolu yaddaşa yazırıq və birbaşa ana səhifəyə keçirik
+      // Token, rol və İSTİFADƏÇİ ADINI yaddaşa yazırıq və birbaşa ana səhifəyə keçirik
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.user.role);
+      
+      // YENİ ƏLAVƏ EDİLƏN KODLAR: Ad və Soyad
+      if (data.user.firstName) localStorage.setItem("firstName", data.user.firstName);
+      if (data.user.lastName) localStorage.setItem("lastName", data.user.lastName);
+      
       router.push("/");
 
     } catch (err: any) {

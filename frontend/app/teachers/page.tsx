@@ -75,7 +75,8 @@ export default function TeachersList() {
                 {/* Qiymət və Düymə */}
                 <div className="flex flex-col items-end flex-shrink-0">
                   <span className="text-sm font-black text-slate-900">{teacher.pricePerMonth} AZN</span>
-                  <Link href={`/teacher/${teacher.id}`} className="mt-2 text-xs bg-slate-900 text-white px-4 py-1.5 rounded-lg font-bold active:bg-slate-700 transition-colors">
+                  {/* LİNK BURADA DƏYİŞDİRİLDİ */}
+                  <Link href={`/teacher?id=${teacher.id}`} className="mt-2 text-xs bg-slate-900 text-white px-4 py-1.5 rounded-lg font-bold active:bg-slate-700 transition-colors">
                     Bax
                   </Link>
                 </div>
