@@ -1,0 +1,9 @@
+{
+  "appId": "com.hazirliqlar.app",
+  "appName": "Hazirliqlar",
+  "webDir": "out",
+  "server": {
+    "url": "https://hazirliqlar.vercel.app",
+    "cleartext": true
+  }
+}

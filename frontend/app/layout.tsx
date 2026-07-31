@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import FloatingEditor from "../components/FloatingEditor";
+import BottomNav from "../components/BottomNav"; // 1. İMPORT ƏLAVƏ EDİLDİ
 import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,18 +22,29 @@ export default function RootLayout({
   return (
     <html lang="az">
       <body className={`${inter.className} bg-slate-50 min-h-screen flex flex-col`}>
-        <Navbar />
         
-        <main className="flex-grow">
+        {/* Vebsayt üçün Navbar (Mobildə gizlədilir ki, proqram kimi görünsün) */}
+        <div className="hidden md:block">
+          <Navbar />
+        </div>
+        
+        {/* Mobildə alt menyu məzmunun üstünü örtməsin deyə pb-20 əlavə edildi */}
+        <main className="flex-grow pb-20 md:pb-0">
           {children}
         </main>
 
-        <Footer />
+        {/* Vebsayt üçün Footer (Mobildə gizlədilir) */}
+        <div className="hidden md:block">
+          <Footer />
+        </div>
 
-        {/* Canlı Redaktə (Live Edit) Paneli - Yalnız URL-də edit=true olanda ekrana çıxır */}
+        {/* Canlı Redaktə (Live Edit) Paneli */}
         <Suspense fallback={null}>
           <FloatingEditor />
         </Suspense>
+        
+        {/* 2. YENİ ALT MENYU ƏLAVƏ EDİLDİ (Yalnız telefonda görünür) */}
+        <BottomNav />
         
       </body>
     </html>

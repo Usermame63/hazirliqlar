@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,10 +25,10 @@ export default function AdminDashboard() {
     
     const fetchAdminData = async () => {
       try {
-        const statsRes = await axios.get("http://localhost:5000/api/admin/stats");
+        const statsRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/stats");
         setStats(statsRes.data);
 
-        const usersRes = await axios.get("http://localhost:5000/api/admin/users");
+        const usersRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/users");
         setUsers(usersRes.data);
       } catch (error) {
         console.error("Məlumatlar yüklənmədi");
@@ -43,10 +43,10 @@ export default function AdminDashboard() {
   const handleDeleteUser = async (id: string) => {
     if (!confirm("Bu istifadəçini sistemdən tamamilə silmək istədiyinizə əminsiniz?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`);
+      await axios.delete(`https://hazirliqlar-backend.onrender.com/api/admin/users/${id}`);
       setUsers(users.filter((user) => user.id !== id));
       
-      const statsRes = await axios.get("http://localhost:5000/api/admin/stats");
+      const statsRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/stats");
       setStats(statsRes.data);
     } catch (error) {
       alert("İstifadəçi silinə bilmədi");

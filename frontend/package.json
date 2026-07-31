@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
     "axios": "^1.16.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",

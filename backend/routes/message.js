@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const jwt = require('jsonwebtoken');
@@ -99,7 +99,7 @@ router.get('/:otherUserId', authenticate, async (req, res) => {
 router.post('/upload', authenticate, upload.single('file'), (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "Fayl tapılmadı" });
-    const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const fileUrl = `https://hazirliqlar-backend.onrender.com/uploads/${req.file.filename}`;
     res.json({ fileUrl });
   } catch (error) {
     res.status(500).json({ message: "Fayl yüklənmədi" });

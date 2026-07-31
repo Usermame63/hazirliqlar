@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -36,12 +36,12 @@ export default function ChatPage() {
   const fetchContacts = async (role: string, token: string) => {
     try {
       if (role === "TEACHER") {
-        const res = await axios.get("http://localhost:5000/api/message/conversations", {
+        const res = await axios.get("https://hazirliqlar-backend.onrender.com/api/message/conversations", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setContacts(res.data);
       } else {
-        const res = await axios.get("http://localhost:5000/api/teacher");
+        const res = await axios.get("https://hazirliqlar-backend.onrender.com/api/teacher");
         setContacts(res.data);
       }
     } catch (error) {
@@ -57,7 +57,7 @@ export default function ChatPage() {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setCurrentUser(payload);
       
-      socket = io("http://localhost:5000");
+      socket = io("https://hazirliqlar-backend.onrender.com");
       socket.emit("register", payload.userId);
 
       fetchContacts(payload.role, token);
@@ -107,7 +107,7 @@ export default function ChatPage() {
     if (!targetId) return;
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/message/${targetId}`, {
+      const res = await axios.get(`https://hazirliqlar-backend.onrender.com/api/message/${targetId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data);
@@ -152,7 +152,7 @@ export default function ChatPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/api/message/upload", formData, {
+      const res = await axios.post("https://hazirliqlar-backend.onrender.com/api/message/upload", formData, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
       });
       
@@ -183,7 +183,7 @@ export default function ChatPage() {
         const formData = new FormData();
         formData.append("file", blob, "voice-message.webm");
         const token = localStorage.getItem("token");
-        const res = await axios.post("http://localhost:5000/api/message/upload", formData, {
+        const res = await axios.post("https://hazirliqlar-backend.onrender.com/api/message/upload", formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hazirliqlar</string>
+    <string name="title_activity_main">Hazirliqlar</string>
+    <string name="package_name">com.hazirliqlar.app</string>
+    <string name="custom_url_scheme">com.hazirliqlar.app</string>
+</resources>

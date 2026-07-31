@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -12,7 +12,7 @@ export default function GlobalMap() {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/teacher");
+        const res = await axios.get("https://hazirliqlar-backend.onrender.com/api/teacher");
         setTeachers(res.data);
       } catch (error) {
         console.error("Müəllimləri yükləyərkən xəta:", error);
@@ -28,7 +28,7 @@ export default function GlobalMap() {
   useEffect(() => {
     if (loading || typeof window === 'undefined') return;
 
-    let mapInstance: any = null; // Çoxalmanın qarşısını almaq üçün xəritəni yadda saxlayırıq
+    let mapInstance: any = null;
 
     const loadMap = () => {
       const L = (window as any).L;
@@ -36,20 +36,17 @@ export default function GlobalMap() {
 
       const container = document.getElementById('global-map');
       if (container != null) {
-        // ƏSAS HƏLL BURADADIR: Köhnə xəritənin qalıqlarını tamamilə silirik
         (container as any)._leaflet_id = null;
         container.innerHTML = ''; 
       }
 
       mapInstance = L.map('global-map').setView([40.4093, 49.8671], 13);
 
-      // Premium Google Satellite Hybrid xəritəsi
       L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         attribution: '&copy; Google Maps'
       }).addTo(mapInstance);
 
-      // Hər bir müəllim üçün KOMPAKT marker yaradırıq
       teachers.forEach((teacher) => {
         if (teacher.address && teacher.address.includes("|||")) {
           const coordsText = teacher.address.split(" ||| ")[1];
@@ -113,7 +110,6 @@ export default function GlobalMap() {
       loadMap();
     }
 
-    // İKİNCİ HƏLL: Səhifədən çıxanda və ya yenilənəndə xəritə tam məhv edilir
     return () => {
       if (mapInstance) {
         mapInstance.remove();
@@ -122,46 +118,42 @@ export default function GlobalMap() {
   }, [loading, teachers]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="flex flex-col h-screen bg-slate-50">
       
-      {/* Üst Başlıq Hissəsi */}
-      <div className="bg-white border-b border-slate-200 py-6 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* TƏTBİQ BAŞLIĞI (Mobil format) */}
+      <header className="bg-white px-5 pt-12 pb-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] z-10 relative">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-              <span className="text-4xl">🗺️</span> Xəritədə Müəllimlər
-            </h1>
-            <p className="text-slate-500 font-medium mt-1">Özünüzə ən yaxın müəllimi tapın və detallarına baxın.</p>
+            <h1 className="text-xl font-bold text-slate-900">Xəritədə Tap</h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Sizə ən yaxın mütəxəssislər</p>
           </div>
-          
-          <Link href="/" className="bg-slate-100 text-slate-700 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-200 transition flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-            Siyahı görünüşü
+          <Link href="/teachers" className="bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm active:bg-slate-200 transition">
+            Siyahı
           </Link>
         </div>
-      </div>
+      </header>
 
-      {/* Xəritənin Özü */}
-      <div className="flex-grow relative p-4 md:p-8 max-w-7xl mx-auto w-full">
+      {/* Xəritə Container (Tam Ekran) */}
+      <div className="flex-1 relative z-0">
         {loading ? (
-          <div className="w-full h-[75vh] bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
-              <div className="text-slate-500 font-bold">Xəritə yüklənir...</div>
+          <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600"></div>
+              <div className="text-slate-500 font-bold text-sm">Xəritə yüklənir...</div>
             </div>
           </div>
         ) : (
-          <div className="w-full h-[75vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-200 relative z-0">
+          <>
             <div id="global-map" className="w-full h-full"></div>
             
-            {/* Üzərindəki Kiçik Məlumat Qutusu */}
-            <div className="absolute bottom-6 left-6 z-[1000] bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-slate-100 pointer-events-none">
+            {/* Üzərindəki Kompakt Məlumat Qutusu (Yuxarıda, başlıq altında) */}
+            <div className="absolute top-4 left-4 right-4 z-[1000] bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-slate-100 pointer-events-none flex justify-between items-center">
               <div className="text-sm font-bold text-slate-800">
-                Aktiv nəticə: <span className="text-blue-600 text-lg">{teachers.filter(t => t.address?.includes('|||')).length} müəllim</span> xəritədə
+                <span className="text-blue-600 text-base">{teachers.filter(t => t.address?.includes('|||')).length}</span> nəticə tapıldı
               </div>
-              <div className="text-xs text-slate-500 font-medium mt-1">Markerin üzərinə klikləyərək məlumatlara baxa bilərsiniz.</div>
+              <div className="text-[11px] text-slate-500 font-medium">Klikləyib baxın</div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
