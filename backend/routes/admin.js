@@ -54,14 +54,25 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// 3. Şüpheli/Sahte Kullanıcıyı Sistemden Tamamen Sil
+// 3. Şüpheli/Sahte Kullanıcıyı ve Bağlı Profillerini Sistemden Tamamen Sil
 router.delete('/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.user.delete({ where: { id } });
+
+    // Əgər istifadəçinin müəllim profili varsa, əvvəlcə onu silirik ki, xəta verməsin
+    await prisma.teacher.deleteMany({
+      where: { userId: id }
+    });
+
+    // İndi isə istifadəçinin özünü silirik
+    await prisma.user.delete({ 
+      where: { id } 
+    });
+
     res.json({ message: "Kullanıcı başarıyla silindi" });
   } catch (error) {
-    res.status(500).json({ message: "Kullanıcı silinirken hata oluştu" });
+    console.error("Silmə xətası:", error);
+    res.status(500).json({ message: "Kullanıcı silinirken hata oluştu", error: error.message });
   }
 });
 
