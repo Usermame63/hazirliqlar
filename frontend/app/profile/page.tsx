@@ -76,15 +76,12 @@ export default function Profile() {
       } 
       // Şagird məlumatlarını çəkmək
       else if (storedRole === "STUDENT") {
+        // BURADA SƏHV LINK DÜZƏLDİLDİ: /api/student əlavə edildi!
         axios.get("https://hazirliqlar-backend.onrender.com/api/student/recent-views", {
           headers: { Authorization: `Bearer ${token}` }
         }).then(res => {
           setRecentViews(res.data);
         }).catch(err => console.error("Baxışlar çəkilə bilmədi", err));
-
-        // Təhsil məlumatlarını (əgər bazada varsa) localStorage-dən çəkirik, amma bunu realda backend-dən çəkmək lazımdır. 
-        // Hələlik localStorage-dən oxuyuruq. Gələcəkdə /api/student/profile əlavə etmək olar.
-        // Amma sən indi redaktə edəndə backend-ə yazılacaq.
       }
       setLoading(false);
     }
@@ -135,7 +132,7 @@ export default function Profile() {
     }
   };
 
-  // --- MÜƏLLİM SAXLAMA, GPS VƏ XƏRİTƏ (Olduğu kimi) ---
+  // --- MÜƏLLİM SAXLAMA, GPS VƏ XƏRİTƏ ---
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus("Saxlanılır...");
