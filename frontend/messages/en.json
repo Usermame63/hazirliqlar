@@ -1,0 +1,31 @@
+{
+  "Navbar": {
+    "map": "Map",
+    "teachers": "Teachers",
+    "students": "Students",
+    "about": "About",
+    "feedback": "Reviews",
+    "login": "Login",
+    "register": "Register",
+    "account": "Account",
+    "profile": "Profile",
+    "messages": "Messages",
+    "logout": "Logout"
+  },
+  "Home": {
+    "greeting": "Welcome",
+    "balance": "Balance",
+    "search": "Search for subject or teacher...",
+    "weekly": "Teachers of the Week",
+    "view_all": "View all",
+    "play_now": "Play & Win Now!",
+    "categories": {
+      "all": "All",
+      "math": "Math",
+      "english": "English",
+      "programming": "Programming",
+      "logic": "Logic",
+      "physics": "Physics"
+    }
+  }
+}

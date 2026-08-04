@@ -1,0 +1,31 @@
+{
+  "Navbar": {
+    "map": "Harita",
+    "teachers": "Öğretmenler",
+    "students": "Öğrenciler",
+    "about": "Hakkımızda",
+    "feedback": "Yorumlar",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "account": "Hesabım",
+    "profile": "Profil",
+    "messages": "Mesajlar",
+    "logout": "Çıkış Yap"
+  },
+  "Home": {
+    "greeting": "Hoş geldiniz",
+    "balance": "Bakiye",
+    "search": "Ders veya öğretmen ara...",
+    "weekly": "Haftanın Öğretmenleri",
+    "view_all": "Tümünü Gör",
+    "play_now": "Oyna ve Kazan!",
+    "categories": {
+      "all": "Tümü",
+      "math": "Matematik",
+      "english": "İngilizce",
+      "programming": "Programlama",
+      "logic": "Mantık",
+      "physics": "Fizik"
+    }
+  }
+}

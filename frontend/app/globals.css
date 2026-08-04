@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+/* Tailwind v4 üçün Qaranlıq Rejim əmri */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* İşıq rejimi üçün kök dəyişənlər */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -12,15 +16,98 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================= */
+/* QARANLIQ REJİM - QAT-QAT BOZ TONLARI (3 Layer) */
+/* ============================================= */
+.dark {
+  /* 1. Ən arxa fon (Ən tünd qara) */
+  --background: #0f172a; /* slate-900 */
+  --foreground: #f1f5f9; /* slate-100 */
+
+  /* 2. Kartlar və bloklar üçün (Bir az açıq boz) */
+  --card-bg: #1e293b;     /* slate-800 */
+  
+  /* 3. Daxili qutular və statistikalar üçün (Daha açıq boz) */
+  --inner-bg: #334155;    /* slate-700 */
+  
+  /* Sərhədlər üçün */
+  --border-color: #475569; /* slate-600 */
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
 }
+
+/* Sürüşdürmə çubuğunu (scrollbar) gizlədən kod */
+::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  background: transparent;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ======================================================== */
+/* ELEMENTLƏRİ QAT-QAT AYIRAN VƏ BOZ TONLARI TƏTBİQ EDƏN KODLAR */
+/* ======================================================== */
+
+/* 1. Ən arxa fonu təyin et */
+.dark body, .dark div, .dark header, .dark main, .dark footer,
+.dark section, .dark nav {
+  background-color: var(--background) !important; 
+}
+
+/* 2. Bütün əsas kartları (bg-white) bir az açıq tünd boz et */
+.dark .bg-white, .dark .bg-slate-50 {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* 3. Daxili qutuları və ya statistika hissələrini (bg-slate-100/200) daha açıq tünd boz et */
+.dark .bg-slate-100, .dark .bg-slate-200, 
+.dark .bg-gray-100, .dark .bg-gray-200,
+.dark .grid .bg-white {
+  background-color: var(--inner-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* 4. Düymələr və kateqoriyalar (Bütün, Riyaziyyat...) */
+.dark button, .dark .bg-white.border-slate-200 {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: #cbd5e1 !important; /* Boz yazılar */
+}
+.dark button.bg-slate-900 {
+  background-color: #3b82f6 !important; /* Seçiləndə mavi olsun */
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* 5. Sərhədləri (Border) aydın et */
+.dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300,
+.dark .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+/* 6. Mətnlərin rəngini qaranlıq rejimə uyğunlaşdır */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #f8fafc !important; 
+}
+.dark p, .dark span, .dark li, .dark .text-slate-500, .dark .text-slate-400 {
+  color: #94a3b8 !important; /* Köməkçi mətnlər üçün açıq boz */
+}
+.dark .text-slate-800, .dark .text-slate-900, .dark .font-bold {
+  color: #f1f5f9 !important; /* Əsas yazılar üçün parlaq ağ */
+}
+
+/* 7. Mavi vurğuları qaranlıqda parlaq saxla */
+.dark .text-blue-600 { color: #60a5fa !important; }
+.dark .bg-blue-600 { background-color: #2563eb !important; }
+.dark .border-blue-100 { border-color: #1e3a8a !important; }

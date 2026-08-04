@@ -1,0 +1,31 @@
+{
+  "Navbar": {
+    "map": "Xəritə",
+    "teachers": "Müəllimlər",
+    "students": "Şagirdlər",
+    "about": "Haqqımızda",
+    "feedback": "Rəylər",
+    "login": "Daxil ol",
+    "register": "Qeydiyyat",
+    "account": "Hesabım",
+    "profile": "Şəxsi Profil",
+    "messages": "Mesajlarım",
+    "logout": "Çıxış et"
+  },
+  "Home": {
+    "greeting": "Xoş gəldiniz",
+    "balance": "Balans",
+    "search": "Fənn və ya müəllim axtar...",
+    "weekly": "Həftənin Müəllimləri",
+    "view_all": "Hamısına bax",
+    "play_now": "İndi Oyna və Qazan!",
+    "categories": {
+      "all": "Bütün",
+      "math": "Riyaziyyat",
+      "english": "İngilis dili",
+      "programming": "Proqramlaşdırma",
+      "logic": "Məntiq",
+      "physics": "Fizika"
+    }
+  }
+}
