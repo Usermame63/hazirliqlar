@@ -1,4 +1,4 @@
-import { NextIntlConfig } from 'next-intl';
+import { IntlConfig } from 'next-intl';
 
 const config: NextIntlConfig = {
   locales: ['az', 'en', 'tr', 'ru'],
