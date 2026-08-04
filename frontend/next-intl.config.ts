@@ -1,4 +1,4 @@
-// Tip təyini (": IntlConfig") qoymurduq! Bu, TypeScript xətasını düzəldir.
+// Tip təyini qoymuruq ki, TypeScript xətası verməsin
 const config = {
   locales: ['az', 'en', 'tr', 'ru'],
   defaultLocale: 'az',
