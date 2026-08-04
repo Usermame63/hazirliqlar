@@ -13,7 +13,6 @@ export default function Home() {
   const [greeting, setGreeting] = useState("Xoş gəldiniz");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Real və sinxron balans sistemi
   const [balance, setBalance] = useState(0.00); 
 
   const [topTeachers, setTopTeachers] = useState<any[]>([]);
@@ -35,7 +34,6 @@ export default function Home() {
     
     if (token) {
       setIsLoggedIn(true);
-      // Oyundan və cüzdandan qayıdanda ən son balansı dərhal oxuyur
       const savedBalance = localStorage.getItem("app_balance");
       setBalance(savedBalance ? parseFloat(savedBalance) : 0.00);
     }
@@ -119,7 +117,7 @@ export default function Home() {
 
       <div className="bg-white min-h-screen pb-24 relative z-10" style={{ transform: `translateY(${pullDistance}px)`, transition: pullDistance === 0 && !isRefreshing ? 'transform 0.3s ease-out' : 'none' }}>
         
-        {/* APP HEADER - YENİ BALANS SİSTEMİ İLƏ */}
+        {/* APP HEADER - BALANS SİSTEMİ İLƏ */}
         <header className="px-6 pt-12 pb-5 border-b border-slate-50">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -128,7 +126,7 @@ export default function Home() {
             </div>
             
             <div className="flex items-center gap-3">
-              {/* YENİ: Balans Göstəricisi */}
+              {/* Balans Göstəricisi */}
               {isLoggedIn && (
                 <Link href="/wallet" className="flex items-center gap-1.5 bg-green-50 text-green-700 font-bold px-3 py-1.5 rounded-full text-sm border border-green-200 active:scale-95 transition-transform">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -171,46 +169,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* OYNA QAZAN BÖLMƏSİ (Şarlar, Fişənglər və Asılı Şəkil) */}
-          <div className="px-6 relative">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-6 text-center border border-blue-100 relative overflow-hidden shadow-sm">
-              <div className="absolute inset-0 confetti-bg"></div>
-              <div className="absolute top-2 left-2 text-2xl animate-bounce">🎈</div>
-              <div className="absolute bottom-4 right-3 text-2xl animate-pulse">🎉</div>
-              
-              <div className="relative z-10">
-                <span className="inline-block bg-orange-100 text-orange-600 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-widest mb-3 border border-orange-200">
-                  Yeni Güncəlləmə! 🎁
-                </span>
-                
-                <h2 className="text-xl font-black text-slate-900 mb-1 leading-tight">YENİ GƏLMƏDİK,<br/><span className="text-blue-600">GERİ GƏLDİK!</span></h2>
-                <p className="text-xs text-slate-500 font-medium mb-6">Bilik yarışmalarına qatıl, cavabla və sən də real pul qazan!</p>
-
-                {/* YELLƏNƏN ŞƏKİL ANİMASİYASI */}
-                <div className="relative mx-auto w-64 h-40 mb-6">
-                  {/* Yuxarıdan tutan əl / İp simulyasiyası */}
-                  <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 w-1 h-6 bg-slate-300 z-20 origin-top animate-swing">
-                    <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 text-xl">🖐️</div>
-                  </div>
-                  
-                  {/* Yellənən Şəkil Konteyneri */}
-                  <div className="w-full h-full animate-swing shadow-lg rounded-2xl overflow-hidden border-4 border-white bg-slate-100 flex items-center justify-center">
-                    <img 
-                      src="/image_b8275d.jpg" 
-                      alt="Bilik Yarışması" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  </div>
-                </div>
-
-                <Link href="/play" className="inline-block w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black py-3.5 rounded-xl transition shadow-lg shadow-blue-500/30 text-sm">
-                  İndi Oyna və Qazan! 🎮
-                </Link>
-              </div>
-            </div>
-          </div>
-
           {/* HƏFTƏNİN MÜƏLLİMLƏRİ */}
           <div className="space-y-4">
             <div className="px-6 flex justify-between items-end">
@@ -250,6 +208,59 @@ export default function Home() {
                 <div className="min-w-full text-center text-sm text-slate-400 py-4">Hələ müəllim əlavə edilməyib.</div>
               )}
             </div>
+          </div>
+
+          {/* OYNA QAZAN BÖLMƏSİ (İndi HƏFTƏNİN MÜƏLLİMLƏRİ-nin altında) */}
+          <div className="px-6 relative">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-6 text-center border border-blue-100 relative overflow-hidden shadow-sm">
+              <div className="absolute inset-0 confetti-bg"></div>
+              <div className="absolute top-2 left-2 text-2xl animate-bounce">🎈</div>
+              <div className="absolute bottom-4 right-3 text-2xl animate-pulse">🎉</div>
+              
+              <div className="relative z-10">
+                <span className="inline-block bg-orange-100 text-orange-600 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-widest mb-3 border border-orange-200">
+                  Yeni Güncəlləmə! 🎁
+                </span>
+                
+                <h2 className="text-xl font-black text-slate-900 mb-1 leading-tight">YENİ GƏLMƏDİK,<br/><span className="text-blue-600">GERİ GƏLDİK!</span></h2>
+                <p className="text-xs text-slate-500 font-medium mb-6">Bilik yarışmalarına qatıl, cavabla və sən də real pul qazan!</p>
+
+                {/* YELLƏNƏN ŞƏKİL ANİMASİYASI */}
+                <div className="relative mx-auto w-64 h-40 mb-6">
+                  <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 w-1 h-6 bg-slate-300 z-20 origin-top animate-swing">
+                    <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 text-xl">🖐️</div>
+                  </div>
+                  
+                  <div className="w-full h-full animate-swing shadow-lg rounded-2xl overflow-hidden border-4 border-white bg-slate-100 flex items-center justify-center">
+                    <img 
+                      src="/image_b8275d.jpg" 
+                      alt="Bilik Yarışması" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  </div>
+                </div>
+
+                <Link href="/play" className="inline-block w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black py-3.5 rounded-xl transition shadow-lg shadow-blue-500/30 text-sm">
+                  İndi Oyna və Qazan! 🎮
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ƏSAS DÜYMƏLƏR (Xəritə və Siyahı) - Ən altdadır */}
+          <div className="px-6 grid grid-cols-2 gap-4">
+            <Link href="/teachers" className="bg-slate-50 border border-slate-100 p-5 rounded-2xl active:bg-slate-100 transition-colors flex flex-col justify-center">
+              <svg className="w-6 h-6 text-slate-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              <h3 className="font-semibold text-sm text-slate-900">Bütün Siyahı</h3>
+              <p className="text-slate-400 text-[11px] mt-0.5">Daha çox müəllim</p>
+            </Link>
+            
+            <Link href="/map" className="bg-slate-900 text-white p-5 rounded-2xl active:bg-slate-800 transition-colors shadow-md flex flex-col justify-center">
+              <svg className="w-6 h-6 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+              <h3 className="font-semibold text-sm">Xəritə</h3>
+              <p className="text-slate-400 text-[11px] mt-0.5">Yaxınlığında tap</p>
+            </Link>
           </div>
 
         </main>

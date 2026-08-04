@@ -25,10 +25,13 @@ export default function AdminDashboard() {
     
     const fetchAdminData = async () => {
       try {
-        const statsRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/stats");
+        // TOKEN ƏLAVƏ EDİLDİ VƏ LOKAL SERVERƏ YÖNLƏNDİRİLDİ
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+
+        const statsRes = await axios.get("http://localhost:5000/api/admin/stats", config);
         setStats(statsRes.data);
 
-        const usersRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/users");
+        const usersRes = await axios.get("http://localhost:5000/api/admin/users", config);
         setUsers(usersRes.data);
       } catch (error) {
         console.error("Məlumatlar yüklənmədi");
@@ -48,14 +51,23 @@ export default function AdminDashboard() {
     }
 
     if (!confirm("Bu istifadəçini sistemdən tamamilə silmək istədiyinizə əminsiniz?")) return;
+    
     try {
-      await axios.delete(`https://hazirliqlar-backend.onrender.com/api/admin/users/${id}`);
+      const token = localStorage.getItem("token");
+      // SİLMƏK ÜÇÜN TOKEN GÖNDƏRİLİR
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, config);
+      
       setUsers(users.filter((user) => (user.id || user._id) !== id));
       
-      const statsRes = await axios.get("https://hazirliqlar-backend.onrender.com/api/admin/stats");
+      const statsRes = await axios.get("http://localhost:5000/api/admin/stats", config);
       setStats(statsRes.data);
+      
+      alert("İstifadəçi uğurla silindi!");
     } catch (error) {
-      alert("İstifadəçi silinə bilmədi");
+      console.error("Silinmə xətası:", error);
+      alert("İstifadəçi silinə bilmədi. Ola bilsin ki, bu istifadəçinin bazada rəyləri və ya başqa məlumatları var.");
     }
   };
 
