@@ -1,6 +1,5 @@
-import { IntlConfig } from 'next-intl';
-
-const config: IntlConfig = {
+// Tip təyini (": IntlConfig") qoymurduq! Bu, TypeScript xətasını düzəldir.
+const config = {
   locales: ['az', 'en', 'tr', 'ru'],
   defaultLocale: 'az',
   localeDetection: false,

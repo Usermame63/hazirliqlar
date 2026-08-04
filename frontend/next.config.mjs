@@ -8,5 +8,4 @@ const nextConfig = {
   },
 };
 
-// 'withNextIntl' xüsusi funksiyasını DÜZGÜN çağırırıq. Qarşısında 'export default' yoxdur, içəridə olmalıdır!
 export default withNextIntl(nextConfig);
