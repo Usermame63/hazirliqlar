@@ -29,6 +29,7 @@ export default function Profile() {
 
   // --- REAL ŞAGİRD MƏLUMATLARI ---
   const [recentViews, setRecentViews] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]); // YENİ ƏLAVƏ: Bəyəndiklər
   const [educationLevel, setEducationLevel] = useState("");
   const [educationInstitution, setEducationInstitution] = useState("");
   const [isEducationEditing, setIsEducationEditing] = useState(false);
@@ -76,12 +77,19 @@ export default function Profile() {
       } 
       // Şagird məlumatlarını çəkmək
       else if (storedRole === "STUDENT") {
-        // BURADA SƏHV LINK DÜZƏLDİLDİ: /api/student əlavə edildi!
+        // 1. Son Baxdıqlar
         axios.get("https://hazirliqlar-backend.onrender.com/api/student/recent-views", {
           headers: { Authorization: `Bearer ${token}` }
         }).then(res => {
           setRecentViews(res.data);
         }).catch(err => console.error("Baxışlar çəkilə bilmədi", err));
+
+        // 2. Bəyəndiklər (Favoritlər)
+        axios.get("https://hazirliqlar-backend.onrender.com/api/student/favorites", {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(res => {
+          setFavorites(res.data);
+        }).catch(err => console.error("Favoritlər çəkilə bilmədi", err));
       }
       setLoading(false);
     }
@@ -357,7 +365,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* --- YENİ VƏ DOLĞUN ŞAGİRD PƏNCƏRƏSİ --- */}
+        {/* --- YENİ VƏ DOLĞUN ŞAGİRD PƏNCƏRƏSİ (BƏYƏNDİKLƏRİM DAXİL) --- */}
         {role === "STUDENT" && (
           <div className="space-y-6">
             
@@ -371,7 +379,7 @@ export default function Profile() {
                 </div>
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center text-center">
                   <div className="text-slate-500 text-[10px] font-bold mb-1">Bəyəndiklərim</div>
-                  <div className="text-xl font-black text-slate-800">0</div>
+                  <div className="text-xl font-black text-slate-800">{favorites.length}</div>
                 </div>
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center text-center">
                   <div className="text-slate-500 text-[10px] font-bold mb-1">Rəylərim</div>
@@ -380,7 +388,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* 2. ŞƏXSİ MƏLUMATLAR (İndi real backend-ə bağlıdır) */}
+            {/* 2. ŞƏXSİ MƏLUMATLAR */}
             <div>
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-3 mb-3">Məlumatlarım</h3>
               <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
@@ -450,7 +458,41 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* 3. SON BAXDIQLARIM (İndi Canlı Məlumatlardır!) */}
+            {/* YENİ: 2.5 BƏYƏNDİKLƏRİM (FAVORİTLƏR) */}
+            <div>
+              <div className="flex justify-between items-center mb-3 px-1">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Bəyəndiklərim</h3>
+                <Link href="/teachers" className="text-[10px] text-blue-600 font-bold active:opacity-70">Daha çox</Link>
+              </div>
+              
+              <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
+                {favorites.length > 0 ? (
+                  favorites.map((fav) => (
+                    <Link 
+                      key={fav.id} 
+                      href={`/teacher?id=${fav.teacherId}`}
+                      className="min-w-[160px] bg-white p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center active:scale-95 transition-transform shadow-sm"
+                    >
+                      <div className="w-12 h-12 bg-red-50 text-red-600 font-bold rounded-full flex items-center justify-center mb-2 border border-red-100">
+                        {fav.teacher.firstName ? fav.teacher.firstName.charAt(0).toUpperCase() : "M"}
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-800 truncate max-w-[120px]">
+                        {fav.teacher.firstName} {fav.teacher.lastName}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 truncate max-w-[120px]">
+                        {fav.teacher.subjects && fav.teacher.subjects[0] ? fav.teacher.subjects[0] : "Fənn yoxdur"}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="w-full text-center py-6 text-slate-400 text-xs">
+                    Hələ heç bir müəllimi bəyənməmisiniz.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 3. SON BAXDIQLARIM */}
             <div>
               <div className="flex justify-between items-center mb-3 px-1">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Son Baxdıqlarım</h3>
