@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// 1. Müəllimin öz profili ilə bağlı məlumatlarını çəkmək
+// 1. Müəllimin öz profili
 router.get('/my-profile', authenticateToken, async (req, res) => {
   try {
     const profile = await prisma.teacherProfile.findUnique({
@@ -29,9 +29,28 @@ router.get('/my-profile', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Bütün müəllimlərin siyahısını çəkmək
+// 2. ƏSAS MARŞRUT: Həm bütün müəllimləri, həm də ?id ilə tək müəllimi çəkir
 router.get('/', async (req, res) => {
   try {
+    const { id } = req.query; // `?id=` parametrini oxuyuruq
+
+    // Əgər sorğuda ?id= varsa, demək tək müəllimi axtarır
+    if (id) {
+      const teacher = await prisma.teacherProfile.findUnique({
+        where: { userId: id },
+        include: {
+          user: {
+            select: {
+              id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+            }
+          }
+        }
+      });
+      if (!teacher) return res.status(404).json({ message: 'Müəllim tapılmadı' });
+      return res.json(teacher);
+    }
+
+    // Əgər ?id= yoxdursa, bütün müəllimləri qaytar
     const teachers = await prisma.teacherProfile.findMany({
       include: {
         user: {
@@ -48,11 +67,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 3. Tək bir müəllimin profilini çəkmək (DÜZƏLDİLDİ: userId ilə axtar)
+// 3. KÖHNƏ MARŞRUT (Yenə də saxlayırıq ki, köhnə linklər qırılmasın)
 router.get('/:id', async (req, res) => {
   try {
     const teacher = await prisma.teacherProfile.findUnique({
-      where: { userId: req.params.id }, // BURASI DÜZƏLDİLDİ!
+      where: { userId: req.params.id },
       include: {
         user: {
           select: {
@@ -90,7 +109,7 @@ router.put('/update', authenticateToken, async (req, res) => {
   }
 });
 
-// 5. Müəllim profil şəklini (Portfolyo) yeniləmək
+// 5. Müəllim profil şəklini yeniləmək
 router.put('/photo', authenticateToken, async (req, res) => {
   try {
     const { photoUrl } = req.body;
