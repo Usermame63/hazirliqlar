@@ -25,12 +25,17 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/uploads', express.static('uploads'));
+app.use('/api/feedbacks', require('./routes/feedbacks'));
+app.use('/api/student', require('./routes/student'));
 
 // API Marşrutları
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/teacher', require('./routes/teacher'));
 app.use('/api/message', require('./routes/message'));
 app.use('/api/admin', require('./routes/admin')); // Admin rotasını buraya bağladık!
+
+// YENİ: Oyun və Süni İntellekt (AI) API-si
+app.use('/api/game', require('./routes/game')); 
 
 // Socket.io Canlı Bağlantı Protokolü
 const io = new Server(server, {

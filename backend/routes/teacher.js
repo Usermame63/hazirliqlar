@@ -1,91 +1,107 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const prisma = require('../db');
-
 const router = express.Router();
+const prisma = require('../db');
+const jwt = require('jsonwebtoken');
 
-// 1. Ana səhifə üçün bütün müəllimləri çəkən API
+// Token yoxlanışı (Middleware)
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token yoxdur' });
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Sessiyanız bitib' });
+    req.user = user;
+    next();
+  });
+};
+
+// 1. Müəllimin öz profili ilə bağlı məlumatlarını çəkmək
+router.get('/my-profile', authenticateToken, async (req, res) => {
+  try {
+    const profile = await prisma.teacherProfile.findUnique({
+      where: { userId: req.user.userId },
+      include: { user: true }
+    });
+    res.json(profile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Profil çəkilə bilmədi' });
+  }
+});
+
+// 2. Bütün müəllimlərin siyahısını çəkmək
 router.get('/', async (req, res) => {
   try {
     const teachers = await prisma.teacherProfile.findMany({
       include: {
         user: {
-          select: { firstName: true, lastName: true, email: true, phone: true }
+          select: {
+            id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+          }
         }
       }
     });
     res.json(teachers);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server xətası baş verdi.' });
+    res.status(500).json({ message: 'Müəllimlər çəkilə bilmədi' });
   }
 });
 
-// 2. Müəllim profilinə girəndə onun ŞƏXSİ məlumatlarını gətirən API
-router.get('/my-profile', async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: 'İcazə yoxdur' });
-    
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'menim_cox_gizli_acaram_123');
-
-    const profile = await prisma.teacherProfile.findUnique({
-      where: { userId: decoded.userId }
-    });
-    
-    res.json(profile);
-  } catch (error) {
-    res.status(500).json({ message: 'Xəta baş verdi' });
-  }
-});
-
-// 3. Məlumatları ƏSL BAZADA yeniləyən API
-router.put('/update', async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: 'İcazə yoxdur' });
-    
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'menim_cox_gizli_acaram_123');
-
-    const { subjects, experience, pricePerMonth, mode, address } = req.body;
-    
-    // Fənləri vergülə görə ayırıb siyahıya (array) çeviririk
-    const subjectsArray = typeof subjects === 'string' ? subjects.split(',').map(s => s.trim()) : subjects;
-
-    const updated = await prisma.teacherProfile.update({
-      where: { userId: decoded.userId },
-      data: {
-        subjects: subjectsArray,
-        experience: Number(experience),
-        pricePerMonth: Number(pricePerMonth),
-        mode: mode,
-        address: address
-      }
-    });
-
-    res.json(updated);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Yenilənmə xətası' });
-  }
-});
-
-// 4. Tək bir müəllimin detalları (Gələcəkdə lazım olacaq)
+// 3. Tək bir müəllimin profilini çəkmək (DÜZƏLDİLDİ: userId ilə axtar)
 router.get('/:id', async (req, res) => {
   try {
     const teacher = await prisma.teacherProfile.findUnique({
-      where: { id: req.params.id },
+      where: { userId: req.params.id }, // BURASI DÜZƏLDİLDİ!
       include: {
-        user: { select: { firstName: true, lastName: true, email: true, phone: true } },
-        reviews: true
+        user: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+          }
+        }
       }
     });
-    if (!teacher) return res.status(404).json({ message: 'Tapılmadı' });
+    if (!teacher) return res.status(404).json({ message: 'Müəllim tapılmadı' });
     res.json(teacher);
   } catch (error) {
-    res.status(500).json({ message: 'Xəta' });
+    console.error(error);
+    res.status(500).json({ message: 'Müəllim profili çəkilə bilmədi' });
+  }
+});
+
+// 4. Müəllim profilini yeniləmək
+router.put('/update', authenticateToken, async (req, res) => {
+  try {
+    const { subjects, experience, pricePerMonth, mode, address } = req.body;
+    const updated = await prisma.teacherProfile.update({
+      where: { userId: req.user.userId },
+      data: {
+        subjects: subjects ? subjects.split(',').map(s => s.trim()) : [],
+        experience: Number(experience) || 0,
+        pricePerMonth: Number(pricePerMonth) || 0,
+        mode: mode || "Əyani (Offline)",
+        address: address || ""
+      }
+    });
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Profil yenilənə bilmədi' });
+  }
+});
+
+// 5. Müəllim profil şəklini (Portfolyo) yeniləmək
+router.put('/photo', authenticateToken, async (req, res) => {
+  try {
+    const { photoUrl } = req.body;
+    const updatedProfile = await prisma.teacherProfile.update({
+      where: { userId: req.user.userId },
+      data: { photoUrl: photoUrl }
+    });
+    res.json({ message: 'Şəkil uğurla yeniləndi', profile: updatedProfile });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Şəkil yüklənərkən xəta baş verdi' });
   }
 });
 
