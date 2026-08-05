@@ -17,6 +17,7 @@ function TeacherProfileContent() {
   const [saveStatus, setSaveStatus] = useState("");
 
   useEffect(() => {
+    console.log("🔍 DETECTIVE ADIM 1: ID axtarılır ->", id);
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = JSON.parse(atob(token.split('.')[1]));
@@ -26,10 +27,11 @@ function TeacherProfileContent() {
     const fetchTeacher = async () => {
       try {
         const res = await axios.get(`https://hazirliqlar-backend.onrender.com/api/teacher?id=${id}`);
+        console.log("✅ DETECTIVE ADIM 2: Backenddən məlumat GƏLDİ!", res.data);
         setTeacher(res.data);
         setPhotoUrl(res.data.photoUrl || "");
       } catch (error) {
-        console.error("Müəllim məlumatları çəkilə bilmədi:", error);
+        console.error("❌ DETECTIVE ADIM 2: Məlumat gəlmədi, xəta var!", error);
       } finally {
         setLoading(false);
       }
@@ -62,25 +64,29 @@ function TeacherProfileContent() {
   };
 
   // --- Məlumatları və Koordinatları təmizləyirik ---
-  let displayLat = null;
-  let displayLng = null;
+  let displayLat: number | null = null;
+  let displayLng: number | null = null;
   let displayAddress = "Ünvan qeyd edilməyib";
   let displaySubjects = "Fənn qeyd edilməyib";
-  
+
   if (teacher) {
-    // Fənni yoxla
+    console.log("🔍 DETECTIVE ADIM 3: Teacher obyekti var, içindəkilər yoxlanır...");
     if (teacher.subjects && teacher.subjects.length > 0) {
       displaySubjects = teacher.subjects.join(", ");
     }
 
-    // Ünvanı və koordinatları yoxla
-    if (teacher.address && teacher.address.includes("|||")) {
+    if (teacher.address && typeof teacher.address === 'string' && teacher.address.includes("|||")) {
       const [addrText, coordsText] = teacher.address.split(" ||| ");
       displayAddress = addrText;
       if (coordsText) {
         const [lat, lng] = coordsText.split(",");
-        displayLat = Number(lat);
-        displayLng = Number(lng);
+        const latNum = Number(lat);
+        const lngNum = Number(lng);
+        if (!isNaN(latNum) && !isNaN(lngNum)) {
+          displayLat = latNum;
+          displayLng = lngNum;
+          console.log("🔍 DETECTIVE ADIM 4: Koordinatlar tapıldı!", displayLat, displayLng);
+        }
       }
     } else if (teacher.address) {
       displayAddress = teacher.address;
@@ -91,13 +97,17 @@ function TeacherProfileContent() {
   useEffect(() => {
     if (loading || !teacher || typeof window === 'undefined') return;
 
-    if (displayLat && displayLng) {
+    if (displayLat !== null && displayLng !== null) {
+      console.log("🔍 DETECTIVE ADIM 5: Xəritə elementini çəkməyə başlayırıq...");
       const loadMap = () => {
         const L = (window as any).L;
         if (!L) return;
 
         const container = document.getElementById('teacher-map');
-        if (container != null) (container as any)._leaflet_id = null;
+        if (container != null) {
+          (container as any)._leaflet_id = null;
+          container.innerHTML = '';
+        }
 
         const map = L.map('teacher-map').setView([displayLat, displayLng], 16);
         L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
@@ -105,6 +115,7 @@ function TeacherProfileContent() {
           attribution: '&copy; Google Maps'
         }).addTo(map);
         L.marker([displayLat, displayLng]).addTo(map);
+        console.log("✅ DETECTIVE ADIM 6: Xəritə quruldu və göstərildi!");
       };
 
       if (!(window as any).L) {
@@ -120,6 +131,8 @@ function TeacherProfileContent() {
       } else {
         loadMap();
       }
+    } else {
+        console.log("ℹ️ DETECTIVE ADIM 5: Koordinat olmadığı üçün xəritə çəkilmir.");
     }
   }, [loading, teacher, displayLat, displayLng]);
 
@@ -227,7 +240,7 @@ function TeacherProfileContent() {
         </div>
 
         {/* PEYK XƏRİTƏSİ */}
-        {displayLat && displayLng && (
+        {displayLat !== null && displayLng !== null && (
           <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner">
             <div id="teacher-map" className="w-full h-80 z-0 relative"></div>
           </div>
