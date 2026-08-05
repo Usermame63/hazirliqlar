@@ -33,7 +33,6 @@ router.get('/', async (req, res) => {
   try {
     const { id } = req.query; 
 
-    // Əgər URL-də ?id= varsa, tək müəllim çəkirik
     if (id) {
       const teacher = await prisma.teacherProfile.findUnique({
         where: { userId: id },
@@ -41,7 +40,7 @@ router.get('/', async (req, res) => {
           user: {
             select: {
               id: true, firstName: true, lastName: true, email: true, 
-              phone: true, photoUrl: true, role: true // Telefon nömrəsini də əlavə etdim!
+              phone: true, avatarUrl: true, role: true // DÜZƏLİŞ: photoUrl -> avatarUrl
             }
           }
         }
@@ -50,12 +49,11 @@ router.get('/', async (req, res) => {
       return res.json(teacher);
     }
 
-    // Əgər ?id= yoxdursa, bütün müəllimləri qaytar
     const teachers = await prisma.teacherProfile.findMany({
       include: {
         user: {
           select: {
-            id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+            id: true, firstName: true, lastName: true, email: true, avatarUrl: true, role: true
           }
         }
       }
@@ -75,7 +73,7 @@ router.get('/:id', async (req, res) => {
       include: {
         user: {
           select: {
-            id: true, firstName: true, lastName: true, email: true, phone: true, photoUrl: true, role: true
+            id: true, firstName: true, lastName: true, email: true, phone: true, avatarUrl: true, role: true
           }
         }
       }
@@ -88,6 +86,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// 4. Müəllim məlumatlarını yenilə
 router.put('/update', authenticateToken, async (req, res) => {
   try {
     const { subjects, experience, pricePerMonth, mode, address } = req.body;
@@ -108,6 +107,7 @@ router.put('/update', authenticateToken, async (req, res) => {
   }
 });
 
+// 5. Müəllim profil şəklini yenilə (TeacherProfile-dəki photoUrl)
 router.put('/photo', authenticateToken, async (req, res) => {
   try {
     const { photoUrl } = req.body;
