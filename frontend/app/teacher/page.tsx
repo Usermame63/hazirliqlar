@@ -61,11 +61,11 @@ function TeacherProfileContent() {
     }
   };
 
-  // Xəritə (Peyk) yükləmə funksiyası - əgər koordinat varsa işə düşür
+  // Xəritə (Peyk) yükləmə funksiyası - yalnız koordinat varsa işə düşür
   useEffect(() => {
     if (loading || !teacher || typeof window === 'undefined') return;
 
-    // Yalnız müəllimin lat və lng dəyərləri varsa xəritəni yüklə
+    // 'lat' və 'lng' dəyərləri varsa xəritəni yüklə
     if (teacher.lat && teacher.lng) {
       const loadMap = () => {
         const L = (window as any).L;
@@ -100,12 +100,14 @@ function TeacherProfileContent() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
+  // Əgər müəllim tapılmazsa (404 və ya yanlış ID) xəta ekranı
   if (!teacher) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4"><h2 className="text-xl font-bold text-slate-800 mb-2">Müəllim Tapılmadı</h2><p className="text-sm text-slate-500 mb-6">Axtardığınız profil mövcud deyil.</p><button onClick={() => router.back()} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm">Geriyə qayıt</button></div>;
 
   const isMyProfile = currentUserId === teacher.userId;
 
-  // Fənni yoxlamaq üçün
+  // Fənni və qiyməti yoxla
   const displaySubjects = teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(", ") : "Fənn qeyd edilməyib";
+  const displayPrice = teacher.pricePerMonth !== undefined && teacher.pricePerMonth !== null ? teacher.pricePerMonth : 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 font-sans transition-colors">
@@ -161,11 +163,11 @@ function TeacherProfileContent() {
           </div>
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center border-l border-slate-50 dark:border-slate-800">
             <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Aylıq Ödəniş</span>
-            <span className="text-lg font-black text-green-600 dark:text-green-400">{teacher.pricePerMonth || 0} AZN</span>
+            <span className="text-lg font-black text-green-600 dark:text-green-400">{displayPrice} AZN</span>
           </div>
         </div>
 
-        {/* ƏLAQƏ MƏLUMATLARI (Telefon və Email) - YENİ */}
+        {/* ƏLAQƏ MƏLUMATLARI */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 space-y-2">
           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-green-500 shadow-sm flex-shrink-0">
@@ -203,7 +205,7 @@ function TeacherProfileContent() {
           </div>
         </div>
 
-        {/* PEYK XƏRİTƏSİ (Yalnız koordinat varsa işə düşür) */}
+        {/* PEYK XƏRİTƏSİ (Yalnız koordinat varsa) */}
         {teacher.lat && teacher.lng && (
           <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner">
             <div id="teacher-map" className="w-full h-80 z-0 relative"></div>
