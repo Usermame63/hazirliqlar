@@ -17,7 +17,6 @@ function TeacherProfileContent() {
   const [saveStatus, setSaveStatus] = useState("");
 
   useEffect(() => {
-    console.log("🔍 DETECTIVE ADIM 1: ID axtarılır ->", id);
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = JSON.parse(atob(token.split('.')[1]));
@@ -27,11 +26,14 @@ function TeacherProfileContent() {
     const fetchTeacher = async () => {
       try {
         const res = await axios.get(`https://hazirliqlar-backend.onrender.com/api/teacher?id=${id}`);
-        console.log("✅ DETECTIVE ADIM 2: Backenddən məlumat GƏLDİ!", res.data);
-        setTeacher(res.data);
-        setPhotoUrl(res.data.photoUrl || "");
+        
+        // 🔥 ƏN VACİB DÜZƏLİŞ: Backend bəzən siyahı qaytarır, biz onun ilkini götürürük!
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        
+        setTeacher(data);
+        setPhotoUrl(data.photoUrl || "");
       } catch (error) {
-        console.error("❌ DETECTIVE ADIM 2: Məlumat gəlmədi, xəta var!", error);
+        console.error("Müəllim məlumatları çəkilə bilmədi:", error);
       } finally {
         setLoading(false);
       }
@@ -70,7 +72,6 @@ function TeacherProfileContent() {
   let displaySubjects = "Fənn qeyd edilməyib";
 
   if (teacher) {
-    console.log("🔍 DETECTIVE ADIM 3: Teacher obyekti var, içindəkilər yoxlanır...");
     if (teacher.subjects && teacher.subjects.length > 0) {
       displaySubjects = teacher.subjects.join(", ");
     }
@@ -85,7 +86,6 @@ function TeacherProfileContent() {
         if (!isNaN(latNum) && !isNaN(lngNum)) {
           displayLat = latNum;
           displayLng = lngNum;
-          console.log("🔍 DETECTIVE ADIM 4: Koordinatlar tapıldı!", displayLat, displayLng);
         }
       }
     } else if (teacher.address) {
@@ -98,7 +98,6 @@ function TeacherProfileContent() {
     if (loading || !teacher || typeof window === 'undefined') return;
 
     if (displayLat !== null && displayLng !== null) {
-      console.log("🔍 DETECTIVE ADIM 5: Xəritə elementini çəkməyə başlayırıq...");
       const loadMap = () => {
         const L = (window as any).L;
         if (!L) return;
@@ -115,7 +114,6 @@ function TeacherProfileContent() {
           attribution: '&copy; Google Maps'
         }).addTo(map);
         L.marker([displayLat, displayLng]).addTo(map);
-        console.log("✅ DETECTIVE ADIM 6: Xəritə quruldu və göstərildi!");
       };
 
       if (!(window as any).L) {
@@ -131,8 +129,6 @@ function TeacherProfileContent() {
       } else {
         loadMap();
       }
-    } else {
-        console.log("ℹ️ DETECTIVE ADIM 5: Koordinat olmadığı üçün xəritə çəkilmir.");
     }
   }, [loading, teacher, displayLat, displayLng]);
 
