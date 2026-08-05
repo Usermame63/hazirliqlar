@@ -25,10 +25,9 @@ function TeacherProfileContent() {
 
     const fetchTeacher = async () => {
       try {
-        // BURADA LİNK DÜZGÜNDÜR! Render API-ə müraciət edir.
         const res = await axios.get(`https://hazirliqlar-backend.onrender.com/api/teacher?id=${id}`);
         setTeacher(res.data);
-        setPhotoUrl(res.data.photoUrl || ""); // photoUrl yoxdur, avatarUrl var!
+        setPhotoUrl(res.data.photoUrl || "");
       } catch (error) {
         console.error("Müəllim məlumatları çəkilə bilmədi:", error);
       } finally {
@@ -62,16 +61,68 @@ function TeacherProfileContent() {
     }
   };
 
+  // --- Məlumatları və Koordinatları təmizləyirik ---
+  let displayLat = teacher?.lat;
+  let displayLng = teacher?.lng;
+  let displayAddress = "Ünvan qeyd edilməyib";
+  
+  // Əgər address sətri varsa və içində ||| varsa, koordinatları oradan çıxar
+  if (teacher?.address && teacher.address.includes("|||")) {
+    const [addrText, coordsText] = teacher.address.split(" ||| ");
+    displayAddress = addrText;
+    if (coordsText) {
+      const [lat, lng] = coordsText.split(",");
+      displayLat = Number(lat);
+      displayLng = Number(lng);
+    }
+  } else if (teacher?.address) {
+    displayAddress = teacher.address;
+  }
+
+  // --- Xəritəni Yükləmək üçün YENİ UseEffect ---
+  useEffect(() => {
+    if (loading || !teacher || typeof window === 'undefined') return;
+
+    // Yalnız uğurla tapdığımız displayLat və displayLng varsa xəritəni yüklə
+    if (displayLat && displayLng) {
+      const loadMap = () => {
+        const L = (window as any).L;
+        if (!L) return;
+
+        const container = document.getElementById('teacher-map');
+        if (container != null) (container as any)._leaflet_id = null;
+
+        const map = L.map('teacher-map').setView([displayLat, displayLng], 16);
+        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+          maxZoom: 20,
+          attribution: '&copy; Google Maps'
+        }).addTo(map);
+        L.marker([displayLat, displayLng]).addTo(map);
+      };
+
+      if (!(window as any).L) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = loadMap;
+        document.body.appendChild(script);
+
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+      } else {
+        loadMap();
+      }
+    }
+  }, [loading, teacher, displayLat, displayLng]);
+
+
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
   if (!teacher) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4"><h2 className="text-xl font-bold text-slate-800 mb-2">Müəllim Tapılmadı</h2><p className="text-sm text-slate-500 mb-6">Axtardığınız profil mövcud deyil.</p><button onClick={() => router.back()} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm">Geriyə qayıt</button></div>;
 
   const isMyProfile = currentUserId === teacher.userId;
-
-  // Backend-dən gələn məlumatları təmizləyirik
   const displaySubjects = teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(", ") : "Fənn qeyd edilməyib";
-  const displayAddress = teacher.address ? teacher.address.split(' ||| ')[0] : "Ünvan qeyd edilməyib";
-  // Backend-də avatarUrl istifadə olunur!
   const displayPhoto = teacher.user?.avatarUrl || teacher.photoUrl || null;
 
   return (
@@ -120,7 +171,7 @@ function TeacherProfileContent() {
           )}
         </div>
 
-        {/* STATİSTİKALAR (Qiymət və Təcrübə düzəlir!) */}
+        {/* STATİSTİKALAR */}
         <div className="grid grid-cols-2 gap-3 w-full">
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center">
             <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Təcrübə</span>
@@ -132,7 +183,7 @@ function TeacherProfileContent() {
           </div>
         </div>
 
-        {/* ƏLAQƏ MƏLUMATLARI (Telefon və Email - DÜZƏLDİ!) */}
+        {/* ƏLAQƏ MƏLUMATLARI */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 space-y-2">
           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-green-500 shadow-sm flex-shrink-0">
@@ -154,7 +205,7 @@ function TeacherProfileContent() {
           </div>
         </div>
 
-        {/* DETALLI MƏLUMATLAR (Format və Ünvan - DÜZƏLDİ!) */}
+        {/* DETALLI MƏLUMATLAR */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-2 space-y-1">
           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-blue-500 shadow-sm flex-shrink-0">
@@ -169,6 +220,13 @@ function TeacherProfileContent() {
             <div className="min-w-0"><p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Ünvan</p><p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{displayAddress}</p></div>
           </div>
         </div>
+
+        {/* ✅ XƏRİTƏ (PEYK) BURADA GÖRÜNƏCƏK! */}
+        {displayLat && displayLng && (
+          <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner">
+            <div id="teacher-map" className="w-full h-80 z-0 relative"></div>
+          </div>
+        )}
 
         <div className="pt-2">
           <Link href={`/chat?id=${teacher.user?.id || ''}`} className="flex items-center justify-center gap-2 w-full bg-slate-900 dark:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-md active:bg-slate-800 dark:active:bg-slate-700 transition">
