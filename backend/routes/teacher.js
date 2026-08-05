@@ -3,7 +3,6 @@ const router = express.Router();
 const prisma = require('../db');
 const jwt = require('jsonwebtoken');
 
-// Token yoxlanışı (Middleware)
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -29,19 +28,20 @@ router.get('/my-profile', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. ƏSAS MARŞRUT: Həm bütün müəllimləri, həm də ?id ilə tək müəllimi çəkir
+// 2. Bütün müəllimlər və Tək müəllim (Profil)
 router.get('/', async (req, res) => {
   try {
-    const { id } = req.query; // `?id=` parametrini oxuyuruq
+    const { id } = req.query; 
 
-    // Əgər sorğuda ?id= varsa, demək tək müəllimi axtarır
+    // Əgər URL-də ?id= varsa, tək müəllim çəkirik
     if (id) {
       const teacher = await prisma.teacherProfile.findUnique({
         where: { userId: id },
         include: {
           user: {
             select: {
-              id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+              id: true, firstName: true, lastName: true, email: true, 
+              phone: true, photoUrl: true, role: true // Telefon nömrəsini də əlavə etdim!
             }
           }
         }
@@ -67,7 +67,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 3. KÖHNƏ MARŞRUT (Yenə də saxlayırıq ki, köhnə linklər qırılmasın)
+// 3. Köhnə "/:id" marşrutu
 router.get('/:id', async (req, res) => {
   try {
     const teacher = await prisma.teacherProfile.findUnique({
@@ -75,7 +75,7 @@ router.get('/:id', async (req, res) => {
       include: {
         user: {
           select: {
-            id: true, firstName: true, lastName: true, email: true, photoUrl: true, role: true
+            id: true, firstName: true, lastName: true, email: true, phone: true, photoUrl: true, role: true
           }
         }
       }
@@ -88,7 +88,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 4. Müəllim profilini yeniləmək
 router.put('/update', authenticateToken, async (req, res) => {
   try {
     const { subjects, experience, pricePerMonth, mode, address } = req.body;
@@ -109,7 +108,6 @@ router.put('/update', authenticateToken, async (req, res) => {
   }
 });
 
-// 5. Müəllim profil şəklini yeniləmək
 router.put('/photo', authenticateToken, async (req, res) => {
   try {
     const { photoUrl } = req.body;
