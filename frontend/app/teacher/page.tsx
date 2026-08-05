@@ -62,28 +62,35 @@ function TeacherProfileContent() {
   };
 
   // --- Məlumatları və Koordinatları təmizləyirik ---
-  let displayLat = teacher?.lat;
-  let displayLng = teacher?.lng;
+  let displayLat = null;
+  let displayLng = null;
   let displayAddress = "Ünvan qeyd edilməyib";
+  let displaySubjects = "Fənn qeyd edilməyib";
   
-  // Əgər address sətri varsa və içində ||| varsa, koordinatları oradan çıxar
-  if (teacher?.address && teacher.address.includes("|||")) {
-    const [addrText, coordsText] = teacher.address.split(" ||| ");
-    displayAddress = addrText;
-    if (coordsText) {
-      const [lat, lng] = coordsText.split(",");
-      displayLat = Number(lat);
-      displayLng = Number(lng);
+  if (teacher) {
+    // Fənni yoxla
+    if (teacher.subjects && teacher.subjects.length > 0) {
+      displaySubjects = teacher.subjects.join(", ");
     }
-  } else if (teacher?.address) {
-    displayAddress = teacher.address;
+
+    // Ünvanı və koordinatları yoxla
+    if (teacher.address && teacher.address.includes("|||")) {
+      const [addrText, coordsText] = teacher.address.split(" ||| ");
+      displayAddress = addrText;
+      if (coordsText) {
+        const [lat, lng] = coordsText.split(",");
+        displayLat = Number(lat);
+        displayLng = Number(lng);
+      }
+    } else if (teacher.address) {
+      displayAddress = teacher.address;
+    }
   }
 
-  // --- Xəritəni Yükləmək üçün YENİ UseEffect ---
+  // --- Xəritəni Yükləmək üçün UseEffect ---
   useEffect(() => {
     if (loading || !teacher || typeof window === 'undefined') return;
 
-    // Yalnız uğurla tapdığımız displayLat və displayLng varsa xəritəni yüklə
     if (displayLat && displayLng) {
       const loadMap = () => {
         const L = (window as any).L;
@@ -116,13 +123,11 @@ function TeacherProfileContent() {
     }
   }, [loading, teacher, displayLat, displayLng]);
 
-
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
   if (!teacher) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4"><h2 className="text-xl font-bold text-slate-800 mb-2">Müəllim Tapılmadı</h2><p className="text-sm text-slate-500 mb-6">Axtardığınız profil mövcud deyil.</p><button onClick={() => router.back()} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm">Geriyə qayıt</button></div>;
 
   const isMyProfile = currentUserId === teacher.userId;
-  const displaySubjects = teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(", ") : "Fənn qeyd edilməyib";
   const displayPhoto = teacher.user?.avatarUrl || teacher.photoUrl || null;
 
   return (
@@ -221,7 +226,7 @@ function TeacherProfileContent() {
           </div>
         </div>
 
-        {/* ✅ XƏRİTƏ (PEYK) BURADA GÖRÜNƏCƏK! */}
+        {/* PEYK XƏRİTƏSİ */}
         {displayLat && displayLng && (
           <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner">
             <div id="teacher-map" className="w-full h-80 z-0 relative"></div>
