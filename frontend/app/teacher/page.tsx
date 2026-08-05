@@ -25,9 +25,10 @@ function TeacherProfileContent() {
 
     const fetchTeacher = async () => {
       try {
+        // BURADA LİNK DÜZGÜNDÜR! Render API-ə müraciət edir.
         const res = await axios.get(`https://hazirliqlar-backend.onrender.com/api/teacher?id=${id}`);
         setTeacher(res.data);
-        setPhotoUrl(res.data.photoUrl || "");
+        setPhotoUrl(res.data.photoUrl || ""); // photoUrl yoxdur, avatarUrl var!
       } catch (error) {
         console.error("Müəllim məlumatları çəkilə bilmədi:", error);
       } finally {
@@ -61,53 +62,17 @@ function TeacherProfileContent() {
     }
   };
 
-  // Xəritə (Peyk) yükləmə funksiyası - yalnız koordinat varsa işə düşür
-  useEffect(() => {
-    if (loading || !teacher || typeof window === 'undefined') return;
-
-    // 'lat' və 'lng' dəyərləri varsa xəritəni yüklə
-    if (teacher.lat && teacher.lng) {
-      const loadMap = () => {
-        const L = (window as any).L;
-        if (!L) return;
-
-        const container = document.getElementById('teacher-map');
-        if (container != null) (container as any)._leaflet_id = null;
-
-        const map = L.map('teacher-map').setView([teacher.lat, teacher.lng], 16);
-        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-          maxZoom: 20,
-          attribution: '&copy; Google Maps'
-        }).addTo(map);
-        L.marker([teacher.lat, teacher.lng]).addTo(map);
-      };
-
-      if (!(window as any).L) {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = loadMap;
-        document.body.appendChild(script);
-
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
-      } else {
-        loadMap();
-      }
-    }
-  }, [loading, teacher]);
-
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
-  // Əgər müəllim tapılmazsa (404 və ya yanlış ID) xəta ekranı
   if (!teacher) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4"><h2 className="text-xl font-bold text-slate-800 mb-2">Müəllim Tapılmadı</h2><p className="text-sm text-slate-500 mb-6">Axtardığınız profil mövcud deyil.</p><button onClick={() => router.back()} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm">Geriyə qayıt</button></div>;
 
   const isMyProfile = currentUserId === teacher.userId;
 
-  // Fənni və qiyməti yoxla
+  // Backend-dən gələn məlumatları təmizləyirik
   const displaySubjects = teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(", ") : "Fənn qeyd edilməyib";
-  const displayPrice = teacher.pricePerMonth !== undefined && teacher.pricePerMonth !== null ? teacher.pricePerMonth : 0;
+  const displayAddress = teacher.address ? teacher.address.split(' ||| ')[0] : "Ünvan qeyd edilməyib";
+  // Backend-də avatarUrl istifadə olunur!
+  const displayPhoto = teacher.user?.avatarUrl || teacher.photoUrl || null;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 font-sans transition-colors">
@@ -123,8 +88,8 @@ function TeacherProfileContent() {
         {/* PROFİL KARTI */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center relative">
           <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-100 dark:border-blue-800 mb-4 bg-slate-100 flex items-center justify-center">
-            {teacher.photoUrl ? (
-              <img src={teacher.photoUrl} alt="Profil" className="w-full h-full object-cover" />
+            {displayPhoto ? (
+              <img src={displayPhoto} alt="Profil" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-3xl font-black flex items-center justify-center">
                 {teacher.user?.firstName?.[0]?.toUpperCase() || "M"}
@@ -155,7 +120,7 @@ function TeacherProfileContent() {
           )}
         </div>
 
-        {/* STATİSTİKALAR */}
+        {/* STATİSTİKALAR (Qiymət və Təcrübə düzəlir!) */}
         <div className="grid grid-cols-2 gap-3 w-full">
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center">
             <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Təcrübə</span>
@@ -163,11 +128,11 @@ function TeacherProfileContent() {
           </div>
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center border-l border-slate-50 dark:border-slate-800">
             <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Aylıq Ödəniş</span>
-            <span className="text-lg font-black text-green-600 dark:text-green-400">{displayPrice} AZN</span>
+            <span className="text-lg font-black text-green-600 dark:text-green-400">{teacher.pricePerMonth || 0} AZN</span>
           </div>
         </div>
 
-        {/* ƏLAQƏ MƏLUMATLARI */}
+        {/* ƏLAQƏ MƏLUMATLARI (Telefon və Email - DÜZƏLDİ!) */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 space-y-2">
           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-green-500 shadow-sm flex-shrink-0">
@@ -189,7 +154,7 @@ function TeacherProfileContent() {
           </div>
         </div>
 
-        {/* DETALLI MƏLUMATLAR */}
+        {/* DETALLI MƏLUMATLAR (Format və Ünvan - DÜZƏLDİ!) */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-2 space-y-1">
           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-blue-500 shadow-sm flex-shrink-0">
@@ -201,16 +166,9 @@ function TeacherProfileContent() {
             <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-red-500 shadow-sm flex-shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </div>
-            <div className="min-w-0"><p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Ünvan</p><p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{teacher.address ? teacher.address.split(' ||| ')[0] : "Qeyd edilməyib"}</p></div>
+            <div className="min-w-0"><p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Ünvan</p><p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{displayAddress}</p></div>
           </div>
         </div>
-
-        {/* PEYK XƏRİTƏSİ (Yalnız koordinat varsa) */}
-        {teacher.lat && teacher.lng && (
-          <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden shadow-inner">
-            <div id="teacher-map" className="w-full h-80 z-0 relative"></div>
-          </div>
-        )}
 
         <div className="pt-2">
           <Link href={`/chat?id=${teacher.user?.id || ''}`} className="flex items-center justify-center gap-2 w-full bg-slate-900 dark:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-md active:bg-slate-800 dark:active:bg-slate-700 transition">
